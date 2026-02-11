@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para Alondra Paola</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;600&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --rose-color: #e60023;
+            --rose-dark: #960018;
+            --stem-color: #2d6a4f;
+            --paper-color: #fdf6e3;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0a0a0a;
+            overflow: hidden; 
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            user-select: none; 
+            -webkit-tap-highlight-color: transparent; /* Quita el brillo azul al tocar en Android/iOS */
+        }
+
+        /* --- CAPA DE CORAZONES (FONDO INTERACTIVO) --- */
+        #hearts-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5; 
+            overflow: hidden;
+            pointer-events: none; /* Dejamos que los clicks pasen si no tocan un corazón */
+        }
+
+        .heart-item {
+            position: absolute;
+            will-change: transform;
+            filter: drop-shadow(0 0 5px rgba(230, 0, 35, 0.5));
+            touch-action: none; /* IMPORTANTE: Evita que el navegador quiera hacer scroll al tocar el corazón */
+            pointer-events: auto; /* Reactiva los eventos para los corazones */
+            cursor: grab;
+        }
+        .heart-item:active {
+            cursor: grabbing;
+        }
+
+        /* --- CAPA DE UI (TEXTO Y BOTONES) --- */
+        #ui-layer {
+            position: relative;
+            z-index: 10; 
+            width: 100%;
+            height: 100%;
+            overflow-y: auto; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none; /* Permite clicks a los corazones a través del fondo */
+            -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+        }
+
+        .timer-card, 
+        .envelope-container, 
+        .letter-paper,
+        .close-btn {
+            pointer-events: auto; /* Elementos interactivos */
+        }
+
+        /* --- Animaciones --- */
+        @keyframes float-gentle {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(230, 0, 35, 0.3)); }
+            50% { filter: drop-shadow(0 0 20px rgba(230, 0, 35, 0.6)); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Estilos Generales --- */
+        .rose-container {
+            width: 160px; /* Un poco más pequeño para móviles */
+            height: 280px;
+            margin: 0 auto;
+            position: relative;
+            animation: float-gentle 4s ease-in-out infinite;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .rose-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            animation: pulse-glow 3s infinite;
+        }
+
+        /* --- FRASES FLOTANTES --- */
+        .floating-phrase {
+            position: absolute;
+            font-family: 'Great Vibes', cursive;
+            color: rgba(255, 220, 220, 0.9);
+            pointer-events: none;
+            text-shadow: 0 0 15px rgba(255, 0, 80, 0.8);
+            animation: floatUp 9s linear forwards;
+            white-space: nowrap;
+            z-index: 1;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            10% { opacity: 0.9; transform: translateY(-20px) scale(1); }
+            90% { opacity: 0.9; }
+            100% { transform: translateY(-200px) scale(1.2); opacity: 0; }
+        }
+
+        /* Tarjetas Responsivas */
+        .timer-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            min-width: 70px; /* Ajustado para pantallas estrechas */
+            margin-bottom: 5px;
+        }
+        
+        .countdown-card {
+            background: rgba(230, 0, 35, 0.1);
+            border: 1px solid rgba(230, 0, 35, 0.2);
+            min-width: 60px;
+        }
+
+        .month-card-bottom {
+            background: rgba(230, 0, 35, 0.15);
+            border: 1px solid rgba(230, 0, 35, 0.4);
+            min-width: 80px;
+            margin-right: 10px; 
+        }
+
+        /* Sobre */
+        .envelope-container {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+            animation: float-gentle 3s ease-in-out infinite reverse;
+            margin-top: 20px;
+            padding-bottom: 50px; /* Espacio extra abajo para scrolling */
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .letter-paper {
+            background-color: var(--paper-color);
+            width: 85%;
+            max-width: 500px;
+            padding: 30px 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            transform: translateY(50px) scale(0.9);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            color: #3e2723;
+        }
+
+        .modal-overlay.active .letter-paper {
+            transform: translateY(0) scale(1);
+        }
+
+        .letter-text {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.2rem; /* Ajustado para móvil */
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            color: #8d6e63;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 5px;
+        }
+
+        .tape {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 100px;
+            height: 30px;
+            background: rgba(230, 0, 35, 0.2);
+            border: 1px solid rgba(230, 0, 35, 0.1);
+        }
+
+    </style>
+</head>
+<body class="min-h-screen bg-[radial-gradient(circle_at_center,_#1a0505_0%,_#000000_100%)] text-white relative">
+
+    <div id="phrases-container" class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none fixed"></div>
+    
+    <div id="hearts-layer"></div>
+
+    <div id="ui-layer" class="py-6">
+        <main class="relative flex flex-col items-center w-full max-w-4xl px-4">
+            
+            <div class="rose-container">
+                <svg class="rose-svg" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M100 400 Q 100 300 95 250 T 100 150" fill="none" stroke="#2d6a4f" stroke-width="6" stroke-linecap="round"/>
+                    <g fill="#3a8c45" stroke="#1e4f2f" stroke-width="1">
+                        <path d="M100 250 Q 70 240 50 260 Q 70 280 100 250" />
+                        <path d="M98 300 Q 130 290 150 310 Q 130 330 98 300" />
+                    </g>
+                    <path d="M98 320 L 90 325 L 98 330" fill="#1e4f2f" />
+                    <path d="M102 220 L 110 225 L 102 230" fill="#1e4f2f" />
+                    <g transform="translate(100, 110)">
+                        <path d="M0 40 C -30 40 -40 10 -20 -10 C 0 -20 20 -10 40 10 C 30 40 0 40 0 40" fill="#960018" />
+                        <path d="M-15 25 C -35 25 -35 -5 -10 -15 C 10 -15 35 5 25 25 C 15 35 -15 25 -15 25" fill="#c30025" />
+                        <path d="M10 20 C 30 20 40 -5 20 -20 C -5 -20 -15 5 10 20" fill="#b30020" />
+                        <path d="M0 10 C -15 10 -20 -10 0 -20 C 20 -10 15 10 0 10" fill="#e60023" />
+                        <circle cx="0" cy="-5" r="10" fill="#ff1a40" />
+                        <path d="M-5 -5 Q 0 -15 5 -5" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
+                    </g>
+                </svg>
+            </div>
+
+            <div class="text-center mt-[-20px] w-full mb-8 relative z-20">
+                
+                <div class="mb-4 animate-[fadeInUp_1.5s_ease-out_forwards] opacity-0" style="animation-delay: 0.5s;">
+                    <p class="text-rose-300 text-xs tracking-[0.3em] uppercase mb-2">Para mi amor</p>
+                    <h1 class="font-['Great_Vibes'] text-4xl md:text-6xl text-white drop-shadow-[0_0_15px_rgba(255,20,147,0.8)]">
+                        Alondra Paola
+                    </h1>
+                </div>
+
+                <h2 class="font-['Montserrat'] text-xs md:text-sm text-rose-200/90 tracking-widest mb-4 font-light uppercase border-b border-rose-900/50 pb-2 inline-block">
+                    Nuestra Historia
+                </h2>
+
+                <div class="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto mb-8">
+                    <div class="timer-card p-2 rounded-xl flex flex-col items-center">
+                        <span id="total-days" class="text-xl md:text-3xl font-bold text-white">0</span>
+                        <span class="text-[9px] md:text-xs text-rose-300 mt-1 uppercase tracking-wider">Días</span>
+                    </div>
+                    <div class="timer-card p-2 rounded-xl flex flex-col items-center">
+                        <span id="hours" class="text-lg md:text-2xl font-bold text-white">00</span>
+                        <span class="text-[9px] md:text-xs text-rose-300 mt-1 uppercase tracking-wider">Hrs</span>
+                    </div>
+                    <div class="timer-card p-2 rounded-xl flex flex-col items-center">
+                        <span id="minutes" class="text-lg md:text-2xl font-bold text-white">00</span>
+                        <span class="text-[9px] md:text-xs text-rose-300 mt-1 uppercase tracking-wider">Mins</span>
+                    </div>
+                    <div class="timer-card p-2 rounded-xl flex flex-col items-center">
+                        <span id="seconds" class="text-lg md:text-2xl font-bold text-white w-8 md:w-12 tabular-nums">00</span>
+                        <span class="text-[9px] md:text-xs text-rose-300 mt-1 uppercase tracking-wider">Segs</span>
+                    </div>
+                </div>
+
+                <div class="animate-[fadeInUp_1.5s_ease-out_forwards] opacity-0 flex flex-col items-center gap-6" style="animation-delay: 1s;">
+                    <div>
+                        <h2 class="font-['Montserrat'] text-xs text-rose-400 tracking-widest mb-3 font-bold uppercase inline-block">
+                            Nuestro Camino ❤️
+                        </h2>
+                        <div class="flex flex-wrap justify-center items-center gap-2 max-w-xl mx-auto">
+                            <div class="timer-card month-card-bottom p-2 rounded-lg flex flex-col items-center">
+                                <span id="months-count" class="text-lg md:text-2xl font-bold text-rose-500">0</span>
+                                <span class="text-[8px] md:text-[10px] text-rose-200 mt-1 uppercase tracking-wider">Meses</span>
+                            </div>
+                            
+                            <span class="text-[9px] uppercase text-rose-400/70 mx-1">Faltan:</span>
+                            
+                            <div class="timer-card countdown-card p-2 rounded-lg flex flex-col items-center">
+                                <span id="next-days" class="text-md md:text-xl font-bold text-white">0</span>
+                                <span class="text-[8px] md:text-[10px] text-rose-200 mt-1 uppercase tracking-wider">Días</span>
+                            </div>
+                            <div class="timer-card countdown-card p-2 rounded-lg flex flex-col items-center">
+                                <span id="next-hours" class="text-md md:text-xl font-bold text-white">00</span>
+                                <span class="text-[8px] md:text-[10px] text-rose-200 mt-1 uppercase tracking-wider">Hrs</span>
+                            </div>
+                            <div class="timer-card countdown-card p-2 rounded-lg flex flex-col items-center">
+                                <span id="next-minutes" class="text-md md:text-xl font-bold text-white">00</span>
+                                <span class="text-[8px] md:text-[10px] text-rose-200 mt-1 uppercase tracking-wider">Mins</span>
+                            </div>
+                        </div>
+                        <p class="text-rose-500/60 text-[9px] mt-3 animate-pulse">CONTANDO CADA INSTANTE</p>
+                    </div>
+
+                    <div class="envelope-container" onclick="openLetter()">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        <p class="text-[9px] uppercase tracking-widest text-rose-300 mt-2 font-bold">Abrir Carta</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="letter-modal" class="modal-overlay" onclick="closeLetter(event)">
+        <div class="letter-paper" onclick="event.stopPropagation()">
+            <div class="tape"></div>
+            <span class="close-btn" onclick="closeLetter(event)">✕</span>
+            
+            <div class="letter-text">
+                <p class="mb-4 font-bold text-lg text-center text-rose-700">Para mi cachetona hermosa,</p>
+                <p class="mb-2">Hola mi amor,</p>
+                <p class="mb-2">Quería dejarte este pequeño detalle para recordarte lo especial que eres para mí. Cada segundo, cada día y cada mes que pasa a tu lado es el mejor regalo.</p>
+                <p class="mb-2">Gracias por ser mi compañera, mi pedorra mía y mi felicidad entera. No importa cuánto tiempo pase, siempre serás mi persona favorita.</p>
+                <p class="mt-6 text-right font-bold text-rose-800">Te amo infinitamente.<br>Siempre tuyo. ❤️</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Lógica del Tiempo ---
+        const startDate = new Date(2024, 11, 15); 
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = now - startDate;
+            if (diff >= 0) {
+                const totalDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                document.getElementById('total-days').innerText = totalDays;
+                document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
+            }
+            let years = now.getFullYear() - startDate.getFullYear();
+            let months = now.getMonth() - startDate.getMonth();
+            let totalMonths = years * 12 + months;
+            if (now.getDate() < startDate.getDate()) totalMonths--;
+            document.getElementById('months-count').innerText = totalMonths;
+        }
+
+        function updateNextAnniversary() {
+            const now = new Date();
+            let currentYear = now.getFullYear();
+            let currentMonth = now.getMonth();
+            let nextDate = new Date(currentYear, currentMonth, 15);
+            if (now > nextDate) nextDate = new Date(currentYear, currentMonth + 1, 15);
+            const diff = nextDate - now;
+            if (diff >= 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById('next-days').innerText = days;
+                document.getElementById('next-hours').innerText = hours.toString().padStart(2, '0');
+                document.getElementById('next-minutes').innerText = minutes.toString().padStart(2, '0');
+            }
+        }
+        setInterval(() => { updateTimer(); updateNextAnniversary(); }, 1000);
+        updateTimer(); updateNextAnniversary();
+
+        // --- 2. Lógica de la Carta ---
+        function openLetter() { document.getElementById('letter-modal').classList.add('active'); }
+        function closeLetter(event) { document.getElementById('letter-modal').classList.remove('active'); }
+
+        // --- 3. Frases Flotantes (Más Grandes) ---
+        const phrases = ["Te Amo Alondra", "Eres mi vida", "Siempre juntos", "Mi niña hermosa", "Gracias por existir", "Cada día más", "Tú y Yo", "Mi felicidad", "Mi chachetona hermosa", "Pedorra mia"];
+        const container = document.getElementById('phrases-container');
+        function createFloatingPhrase() {
+            const phrase = document.createElement('div');
+            phrase.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+            phrase.classList.add('floating-phrase');
+            
+            // Posición Aleatoria
+            phrase.style.left = `${Math.random() * 80 + 10}%`;
+            phrase.style.top = `${Math.random() * 50 + 30}%`;
+            
+            // TAMAÑO GRANDE
+            const scale = Math.random() * 1.2 + 1.8;
+            phrase.style.fontSize = `${scale}rem`;
+
+            container.appendChild(phrase);
+            setTimeout(() => phrase.remove(), 9000);
+        }
+        setInterval(createFloatingPhrase, 3000);
+
+        // --- 4. MOTOR DE FÍSICA MÓVIL Y ESCRITORIO ---
+        const heartsLayer = document.getElementById('hearts-layer');
+        let hearts = [];
+        
+        // Variables unificadas para Touch y Mouse
+        let inputX = 0, inputY = 0;
+        let lastInputX = 0, lastInputY = 0;
+        let inputVx = 0, inputVy = 0;
+        let draggedHeart = null;
+
+        // Función para normalizar eventos (Touch o Mouse)
+        function getPointerPos(e) {
+            if (e.touches && e.touches.length > 0) {
+                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        function handleMove(e) {
+            const pos = getPointerPos(e);
+            inputX = pos.x;
+            inputY = pos.y;
+            
+            // Calcular velocidad del puntero
+            inputVx = inputX - lastInputX;
+            inputVy = inputY - lastInputY;
+            
+            lastInputX = inputX;
+            lastInputY = inputY;
+
+            if (draggedHeart) {
+                // Mover el corazón
+                draggedHeart.x = inputX - 15; 
+                draggedHeart.y = inputY - 15;
+                draggedHeart.vx = inputVx; // Guardar inercia
+                draggedHeart.vy = inputVy;
+            }
+        }
+
+        function handleEnd() {
+            if (draggedHeart) {
+                // Lanzar con fuerza
+                draggedHeart.vx = inputVx * 0.8; 
+                draggedHeart.vy = inputVy * 0.8; 
+                draggedHeart.isDragging = false;
+                draggedHeart = null;
+            }
+        }
+
+        // Listeners Unificados
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('touchmove', handleMove, { passive: false }); // passive false para prevenir scroll
+
+        document.addEventListener('mouseup', handleEnd);
+        document.addEventListener('touchend', handleEnd);
+
+        class Heart {
+            constructor() {
+                this.element = document.createElement('div');
+                this.element.classList.add('heart-item');
+                this.element.innerHTML = `
+                    <svg width="${Math.random() * 20 + 25}" height="${Math.random() * 20 + 25}" viewBox="0 0 24 24" fill="#e60023">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                `;
+                this.x = Math.random() * window.innerWidth;
+                this.y = window.innerHeight + 50;
+                this.vx = (Math.random() - 0.5) * 1; 
+                this.vy = -(Math.random() * 2 + 1); 
+                this.isDragging = false;
+                this.isDead = false;
+
+                heartsLayer.appendChild(this.element);
+
+                // Eventos de inicio (Touch y Mouse) en el elemento
+                const startDrag = (e) => {
+                    // Si es touch, prevenir el comportamiento por defecto (scroll)
+                    // excepto si es el botón de la carta o texto scrolleable (manejado por CSS touch-action)
+                    if(e.type === 'touchstart') {
+                       // e.preventDefault(); // Opcional, pero touch-action: none en CSS es mejor
+                    }
+                    const pos = getPointerPos(e);
+                    lastInputX = pos.x; 
+                    lastInputY = pos.y;
+                    
+                    this.isDragging = true;
+                    draggedHeart = this;
+                    this.vx = 0;
+                    this.vy = 0;
+                };
+
+                this.element.addEventListener('mousedown', startDrag);
+                this.element.addEventListener('touchstart', startDrag, { passive: true });
+            }
+
+            update() {
+                if (!this.isDragging) {
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    // Física: Fricción y Gravedad si se lanza
+                    if (Math.abs(this.vx) > 0.1 || Math.abs(this.vy) > 2) {
+                        this.vx *= 0.95; 
+                        this.vy *= 0.95;
+                        this.vy += 0.1; 
+                    } else {
+                        // Flotación suave
+                        if (this.vy > -1) this.vy -= 0.05; 
+                        this.x += Math.sin(this.y * 0.05) * 0.5; 
+                    }
+                }
+                this.element.style.transform = `translate(${this.x}px, ${this.y}px)`;
+                
+                if (this.y < -100 || this.y > window.innerHeight + 200) {
+                    this.isDead = true;
+                }
+            }
+        }
+
+        function animate() {
+            for (let i = hearts.length - 1; i >= 0; i--) {
+                let h = hearts[i];
+                h.update();
+                if (h.isDead && !h.isDragging) {
+                    h.element.remove();
+                    hearts.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        setInterval(() => {
+            if (hearts.length < 20) { 
+                hearts.push(new Heart());
+            }
+        }, 600);
+
+        animate();
+
+    </script>
+</body>
+</html>
