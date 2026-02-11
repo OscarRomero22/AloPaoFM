@@ -26,7 +26,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- CAPA DE CORAZONES (INTERACTIVO) --- */
+        /* --- CAPA DE CORAZONES --- */
         #hearts-layer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -45,7 +45,8 @@
         .heart-item:active { cursor: grabbing; }
 
         .heart-special {
-            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.9)) !important;
+            filter: drop-shadow(0 0 25px rgba(255, 215, 0, 1)) !important;
+            z-index: 100;
         }
 
         /* --- CAPA DE UI --- */
@@ -56,7 +57,6 @@
             overflow-y: auto; 
             display: flex; flex-direction: column; align-items: center;
             pointer-events: none;
-            -webkit-overflow-scrolling: touch;
         }
 
         .timer-card, .envelope-container, .letter-paper, .close-btn, .trivia-input, .trivia-btn {
@@ -66,11 +66,6 @@
         @keyframes float-gentle {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-15px); }
-        }
-
-        @keyframes pulse-glow {
-            0%, 100% { filter: drop-shadow(0 0 5px rgba(230, 0, 35, 0.3)); }
-            50% { filter: drop-shadow(0 0 20px rgba(230, 0, 35, 0.6)); }
         }
 
         @keyframes fadeInUp {
@@ -88,33 +83,30 @@
         .rose-container {
             width: 160px; height: 280px; margin: 0 auto;
             position: relative; animation: float-gentle 4s ease-in-out infinite;
-            z-index: 10; pointer-events: none;
+            z-index: 10;
         }
 
-        .rose-svg { width: 100%; height: 100%; overflow: visible; animation: pulse-glow 3s infinite; }
+        .rose-svg { width: 100%; height: 100%; overflow: visible; }
 
         .floating-phrase {
             position: absolute; font-family: 'Great Vibes', cursive;
             color: rgba(255, 220, 220, 0.9); pointer-events: none;
             text-shadow: 0 0 15px rgba(255, 0, 80, 0.8);
-            animation: floatUp 9s linear forwards; white-space: nowrap; z-index: 1;
+            animation: floatUp 9s linear forwards; white-space: nowrap;
         }
 
         @keyframes floatUp {
-            0% { transform: translateY(0) scale(0.8); opacity: 0; }
-            10% { opacity: 0.9; transform: translateY(-20px) scale(1); }
+            0% { transform: translateY(100px) scale(0.8); opacity: 0; }
+            10% { opacity: 0.9; }
             90% { opacity: 0.9; }
-            100% { transform: translateY(-200px) scale(1.2); opacity: 0; }
+            100% { transform: translateY(-300px) scale(1.2); opacity: 0; }
         }
 
         .timer-card {
             background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            min-width: 70px; margin-bottom: 5px;
+            min-width: 75px; margin-bottom: 5px;
         }
-        
-        .countdown-card { background: rgba(230, 0, 35, 0.1); border: 1px solid rgba(230, 0, 35, 0.2); min-width: 60px; }
-        .month-card-bottom { background: rgba(230, 0, 35, 0.15); border: 1px solid rgba(230, 0, 35, 0.4); min-width: 80px; margin-right: 10px; }
 
         .envelope-container { cursor: pointer; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); animation: float-gentle 3s ease-in-out infinite reverse; }
 
@@ -122,17 +114,16 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
             z-index: 100; display: none; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.5s ease;
         }
-        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-overlay.active { display: flex; }
 
         .letter-paper {
-            background-color: var(--paper-color); width: 85%; max-width: 500px;
+            background-color: var(--paper-color); width: 85%; max-width: 450px;
             padding: 30px 20px; border-radius: 5px; box-shadow: 0 0 30px rgba(0,0,0,0.5);
             position: relative; color: #3e2723;
         }
 
-        .letter-text { font-family: 'Dancing Script', cursive; font-size: 1.2rem; line-height: 1.6; }
+        .letter-text { font-family: 'Dancing Script', cursive; font-size: 1.25rem; line-height: 1.6; }
         .trivia-input { width: 100%; padding: 8px; margin: 5px 0 12px 0; border-bottom: 2px solid #e60023; background: transparent; outline: none; font-family: 'Montserrat', sans-serif; color: #3e2723; }
         .trivia-btn { width: 100%; background: #e60023; color: white; padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 10px; }
         .close-btn { position: absolute; top: 10px; right: 10px; font-size: 1.5rem; color: #8d6e63; cursor: pointer; }
@@ -174,19 +165,19 @@
                 <div class="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto mb-8">
                     <div class="timer-card p-2 rounded-xl flex flex-col items-center">
                         <span id="total-days" class="text-xl md:text-3xl font-bold text-white">0</span>
-                        <span class="text-[9px] md:text-xs text-rose-300 mt-1 uppercase tracking-wider">Días</span>
+                        <span class="text-[9px] text-rose-300 uppercase tracking-wider">Días</span>
                     </div>
                     <div class="timer-card p-2 rounded-xl flex flex-col items-center">
                         <span id="hours" class="text-lg md:text-2xl font-bold text-white">00</span>
-                        <span class="text-[9px] md:text-xs text-rose-300 mt-1 uppercase tracking-wider">Hrs</span>
+                        <span class="text-[9px] text-rose-300 uppercase tracking-wider">Hrs</span>
                     </div>
                     <div class="timer-card p-2 rounded-xl flex flex-col items-center">
                         <span id="minutes" class="text-lg md:text-2xl font-bold text-white">00</span>
-                        <span class="text-[9px] md:text-xs text-rose-300 mt-1 uppercase tracking-wider">Mins</span>
+                        <span class="text-[9px] text-rose-300 uppercase tracking-wider">Mins</span>
                     </div>
                     <div class="timer-card p-2 rounded-xl flex flex-col items-center">
-                        <span id="seconds" class="text-lg md:text-2xl font-bold text-white w-8 md:w-12 tabular-nums">00</span>
-                        <span class="text-[9px] md:text-xs text-rose-300 mt-1 uppercase tracking-wider">Segs</span>
+                        <span id="seconds" class="text-lg md:text-2xl font-bold w-8 md:w-12 tabular-nums">00</span>
+                        <span class="text-[9px] text-rose-300 uppercase tracking-wider">Segs</span>
                     </div>
                 </div>
 
@@ -244,7 +235,7 @@
     </div>
 
     <script>
-        const startDate = new Date(2024, 8, 2); // 2 de Septiembre 2024
+        const startDate = new Date(2024, 11, 15); // 15 dic 2024
 
         function updateTimer() {
             const now = new Date();
@@ -264,8 +255,8 @@
 
         function updateNextAnniversary() {
             const now = new Date();
-            let nextDate = new Date(now.getFullYear(), now.getMonth(), 2);
-            if (now > nextDate) nextDate = new Date(now.getFullYear(), now.getMonth() + 1, 2);
+            let nextDate = new Date(now.getFullYear(), now.getMonth(), 15);
+            if (now > nextDate) nextDate = new Date(now.getFullYear(), now.getMonth() + 1, 15);
             const diff = nextDate - now;
             document.getElementById('next-days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
             document.getElementById('next-hours').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
@@ -286,15 +277,15 @@
             } else if(type === 'trivia') {
                 body.innerHTML = `
                     <div class="font-['Montserrat'] text-sm">
-                        <h2 class="text-xl font-bold text-rose-700 mb-4 text-center">para ganarte la sorpresa contesta estas simples preguntas ❤️</h2>
-                        <p class="font-bold mb-1">1. Nombre completo de tu novio:</p>
-                        <input type="text" id="ans1" class="trivia-input" placeholder="Escribe aquí...">
-                        <p class="font-bold mb-1">2. ¿Cuándo empezaron a hablar?</p>
+                        <h2 class="text-xl font-bold text-rose-700 mb-4 text-center">contesta estas 3 preguntas para ganarte una sorpresa ❤️</h2>
+                        <p class="font-bold mb-1 text-xs uppercase">1. Nombre completo de tu novio:</p>
+                        <input type="text" id="ans1" class="trivia-input" placeholder="...">
+                        <p class="font-bold mb-1 text-xs uppercase">2. ¿Cuándo empezaron a hablar?</p>
                         <input type="text" id="ans2" class="trivia-input" placeholder="Ej: 5 de enero del 2025">
-                        <p class="font-bold mb-1">3. Mascota que extraña tu novio:</p>
-                        <input type="text" id="ans3" class="trivia-input" placeholder="Escribe el nombre...">
+                        <p class="font-bold mb-1 text-xs uppercase">3. Mascota que extraña tu novio:</p>
+                        <input type="text" id="ans3" class="trivia-input" placeholder="...">
                         <button onclick="checkTrivia()" class="trivia-btn">Verificar Respuestas</button>
-                        <p id="error-msg" class="text-red-500 text-xs mt-2 hidden text-center">Algo no coincide, ¡intenta de nuevo amor!</p>
+                        <p id="error-msg" class="text-red-500 text-xs mt-2 hidden text-center italic">¡Ups! Alguna respuesta no coincide, amor.</p>
                     </div>`;
             }
             document.getElementById('main-modal').style.display = 'flex';
@@ -310,19 +301,18 @@
             const a1 = document.getElementById('ans1').value.trim().toLowerCase();
             const a2 = document.getElementById('ans2').value.trim().toLowerCase();
             const a3 = document.getElementById('ans3').value.trim().toLowerCase();
-            if(a1 === "oscar antonio romero robles" && a2 === "2 de septiembre del 2024" && a3 === "watis") {
+            if(a1 === "oscar antonio romero robles" && (a2.includes("2 de septiembre") || a2.includes("2 de sept")) && a3 === "watis") {
                 document.getElementById('modal-body').innerHTML = `
                     <div class="text-center py-6">
-                        <h2 class="text-4xl font-bold text-yellow-600 mb-4 font-['Great_Vibes']">🎫 ¡Felicidades!</h2>
-                        <p class="text-2xl font-['Dancing_Script']">Te ganaste una cena sorpresa.</p>
-                        <p class="mt-8 text-rose-700 font-bold">Te amo muchísimo. ❤️</p>
+                        <h2 class="text-4xl font-bold text-yellow-600 mb-4 font-['Great_Vibes']">🎫 ¡Lo lograste!</h2>
+                        <p class="text-2xl font-['Dancing_Script']">Te ganaste una cena sorpresa conmigo.</p>
+                        <p class="mt-8 text-rose-700 font-bold">Te amo muchísimo! ❤️</p>
                     </div>`;
             } else {
                 document.getElementById('error-msg').classList.remove('hidden');
             }
         }
 
-        // --- Frases y Corazones con Física ---
         const phrases = ["Te Amo Alondra", "Eres mi vida", "Siempre juntos", "Mi niña hermosa", "Gracias por existir", "Cada día más", "Tú y Yo", "Mi felicidad", "Mi chachetona hermosa", "Pedorra mia"];
         function createFloatingPhrase() {
             const p = document.createElement('div');
@@ -338,8 +328,7 @@
 
         const heartsLayer = document.getElementById('hearts-layer');
         let hearts = [];
-        let specialSpawned = false;
-        let inputX = 0, inputY = 0, lastInputX = 0, lastInputY = 0, inputVx = 0, inputVy = 0, draggedHeart = null;
+        let lastInputX = 0, lastInputY = 0, inputVx = 0, inputVy = 0, draggedHeart = null;
 
         function getPointerPos(e) {
             if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -348,14 +337,13 @@
 
         window.addEventListener('mousemove', (e) => {
             const pos = getPointerPos(e);
-            inputX = pos.x; inputY = pos.y;
-            inputVx = inputX - lastInputX; inputVy = inputY - lastInputY;
-            lastInputX = inputX; lastInputY = inputY;
-            if (draggedHeart) { draggedHeart.x = inputX - 15; draggedHeart.y = inputY - 15; draggedHeart.vx = inputVx; draggedHeart.vy = inputVy; }
+            inputVx = pos.x - lastInputX; inputVy = pos.y - lastInputY;
+            lastInputX = pos.x; lastInputY = pos.y;
+            if (draggedHeart) { draggedHeart.x = pos.x - 15; draggedHeart.y = pos.y - 15; draggedHeart.vx = inputVx; draggedHeart.vy = inputVy; }
         });
 
-        window.addEventListener('mouseup', () => { if (draggedHeart) { draggedHeart.vx *= 0.8; draggedHeart.vy *= 0.8; draggedHeart.isDragging = false; draggedHeart = null; } });
-        window.addEventListener('touchend', () => { if (draggedHeart) { draggedHeart.vx *= 0.8; draggedHeart.vy *= 0.8; draggedHeart.isDragging = false; draggedHeart = null; } });
+        const release = () => { if (draggedHeart) { draggedHeart.vx *= 0.8; draggedHeart.vy *= 0.8; draggedHeart.isDragging = false; draggedHeart = null; } };
+        window.addEventListener('mouseup', release); window.addEventListener('touchend', release);
 
         class Heart {
             constructor(isSpecial = false) {
@@ -366,22 +354,21 @@
                 this.element.innerHTML = `<svg width="35" height="35" viewBox="0 0 24 24" fill="${color}"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
                 this.x = Math.random() * window.innerWidth;
                 this.y = window.innerHeight + 50;
-                this.vx = (Math.random() - 0.5) * 2;
+                this.vx = (Math.random() - 0.5) * 2.5;
                 this.vy = -(Math.random() * 2 + 1.5);
-                this.isDragging = false;
-                this.isDead = false;
+                this.isDragging = false; this.isDead = false;
                 heartsLayer.appendChild(this.element);
 
                 const startDrag = (e) => {
-                    if(this.isSpecial) {
-                        const env = document.getElementById('surprise-envelope');
-                        env.classList.remove('hidden'); env.classList.add('animate-pop-in');
-                        this.isDead = true;
-                    }
                     const pos = getPointerPos(e);
                     lastInputX = pos.x; lastInputY = pos.y;
                     this.isDragging = true; draggedHeart = this;
                     this.vx = 0; this.vy = 0;
+                    if(this.isSpecial) {
+                        const env = document.getElementById('surprise-envelope');
+                        env.classList.remove('hidden'); env.classList.add('animate-pop-in');
+                        setTimeout(() => { this.isDead = true; }, 100);
+                    }
                 };
                 this.element.addEventListener('mousedown', startDrag);
                 this.element.addEventListener('touchstart', startDrag, { passive: true });
@@ -393,7 +380,7 @@
                     else { if (this.vy > -1) this.vy -= 0.05; this.x += Math.sin(this.y * 0.05) * 0.5; }
                 }
                 this.element.style.transform = `translate(${this.x}px, ${this.y}px)`;
-                if (this.y < -100 || (this.isDead && !this.isDragging)) { this.element.remove(); return true; }
+                if (this.y < -150 || (this.isDead && !this.isDragging)) { this.element.remove(); return true; }
                 return false;
             }
         }
@@ -403,8 +390,26 @@
             requestAnimationFrame(loop);
         }
         loop();
+
+        // Generar corazones rojos normales
         setInterval(() => { if(hearts.length < 15) hearts.push(new Heart(false)); }, 700);
-        setTimeout(() => { if(!specialSpawned) { hearts.push(new Heart(true)); specialSpawned = true; } }, 15000);
+        
+        // Bucle del corazón dorado: aparece cada 30 segundos si el sobre sorpresa aún no se ha desbloqueado
+        setInterval(() => {
+            const envelope = document.getElementById('surprise-envelope');
+            if (envelope.classList.contains('hidden')) {
+                hearts.push(new Heart(true));
+            }
+        }, 30000);
+        
+        // Primera aparición a los 10 segundos
+        setTimeout(() => {
+            const envelope = document.getElementById('surprise-envelope');
+            if (envelope.classList.contains('hidden')) {
+                hearts.push(new Heart(true));
+            }
+        }, 10000);
+
     </script>
 </body>
 </html>
