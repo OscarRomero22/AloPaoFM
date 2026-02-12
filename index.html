@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Para Alondra Paola</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;600&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
     
     <style>
@@ -59,7 +60,7 @@
             pointer-events: none;
         }
 
-        .timer-card, .envelope-container, .letter-paper, .close-btn, .trivia-input, .trivia-btn {
+        .timer-card, .envelope-container, .letter-paper, .close-btn, .trivia-input, .trivia-btn, .pink-trigger {
             pointer-events: auto;
         }
 
@@ -86,7 +87,12 @@
             z-index: 10;
         }
 
-        .rose-svg { width: 100%; height: 100%; overflow: visible; }
+        #pink-heart-flower {
+            position: absolute; top: 10px; left: 10px; z-index: 1; display: none;
+            filter: drop-shadow(0 0 10px #ff69b4); cursor: pointer;
+        }
+
+        .rose-svg { width: 100%; height: 100%; overflow: visible; animation: pulse-glow 3s infinite; }
 
         .floating-phrase {
             position: absolute; font-family: 'Great Vibes', cursive;
@@ -97,15 +103,14 @@
 
         @keyframes floatUp {
             0% { transform: translateY(100px) scale(0.8); opacity: 0; }
-            10% { opacity: 0.9; }
-            90% { opacity: 0.9; }
+            10% { opacity: 0.9; transform: translateY(-20px) scale(1); }
             100% { transform: translateY(-300px) scale(1.2); opacity: 0; }
         }
 
         .timer-card {
             background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            min-width: 75px; margin-bottom: 5px;
+            min-width: 65px; margin-bottom: 5px;
         }
 
         .envelope-container { cursor: pointer; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); animation: float-gentle 3s ease-in-out infinite reverse; }
@@ -113,7 +118,7 @@
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
-            z-index: 100; display: none; justify-content: center; align-items: center;
+            z-index: 1000; display: none; justify-content: center; align-items: center;
         }
         .modal-overlay.active { display: flex; }
 
@@ -128,6 +133,10 @@
         .trivia-btn { width: 100%; background: #e60023; color: white; padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 10px; }
         .close-btn { position: absolute; top: 10px; right: 10px; font-size: 1.5rem; color: #8d6e63; cursor: pointer; }
         .tape { position: absolute; top: -15px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 100px; height: 30px; background: rgba(230, 0, 35, 0.2); }
+
+        .countdown-card { background: rgba(230, 0, 35, 0.1); border: 1px solid rgba(230, 0, 35, 0.2); min-width: 60px; }
+        .month-card-bottom { background: rgba(230, 0, 35, 0.15); border: 1px solid rgba(230, 0, 35, 0.4); min-width: 80px; margin-right: 10px; }
+        .pink-trigger { cursor: pointer; transition: transform 0.3s ease; }
     </style>
 </head>
 <body class="min-h-screen bg-[radial-gradient(circle_at_center,_#1a0505_0%,_#000000_100%)] text-white relative">
@@ -138,6 +147,9 @@
     <div id="ui-layer" class="py-6">
         <main class="relative flex flex-col items-center w-full max-w-4xl px-4">
             <div class="rose-container">
+                <div id="pink-heart-flower" class="pink-trigger" onclick="stepThree()">
+                    <svg width="25" height="25" viewBox="0 0 24 24" fill="#ff69b4"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </div>
                 <svg class="rose-svg" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
                     <path d="M100 400 Q 100 300 95 250 T 100 150" fill="none" stroke="#2d6a4f" stroke-width="6" stroke-linecap="round"/>
                     <g fill="#3a8c45" stroke="#1e4f2f" stroke-width="1">
@@ -162,7 +174,7 @@
 
                 <h2 class="font-['Montserrat'] text-xs md:text-sm text-rose-200/90 tracking-widest mb-4 font-light uppercase border-b border-rose-900/50 pb-2 inline-block">Nuestra Historia</h2>
 
-                <div class="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto mb-8">
+                <div class="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto mb-8">
                     <div class="timer-card p-2 rounded-xl flex flex-col items-center">
                         <span id="total-days" class="text-xl md:text-3xl font-bold text-white">0</span>
                         <span class="text-[9px] text-rose-300 uppercase tracking-wider">Días</span>
@@ -176,7 +188,7 @@
                         <span class="text-[9px] text-rose-300 uppercase tracking-wider">Mins</span>
                     </div>
                     <div class="timer-card p-2 rounded-xl flex flex-col items-center">
-                        <span id="seconds" class="text-lg md:text-2xl font-bold w-8 md:w-12 tabular-nums">00</span>
+                        <span id="seconds" class="text-lg md:text-2xl font-bold text-white w-8 md:w-12 tabular-nums">00</span>
                         <span class="text-[9px] text-rose-300 uppercase tracking-wider">Segs</span>
                     </div>
                 </div>
@@ -207,18 +219,16 @@
 
                     <div class="flex items-center justify-center gap-8 mt-4 w-full h-24">
                         <div class="envelope-container flex flex-col items-center" onclick="openModal('normal')">
-                            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="1.5">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                            <p class="text-[9px] uppercase tracking-widest text-rose-300 mt-2 font-bold">Abrir Carta</p>
+                            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            <p class="text-[9px] uppercase tracking-widest text-rose-300 mt-2 font-bold">Carta</p>
                         </div>
                         <div id="surprise-envelope" class="envelope-container hidden flex flex-col items-center" onclick="openModal('trivia')">
-                            <svg width="50" height="50" viewBox="0 0 24 24" fill="#fbbf24" stroke="#d97706" stroke-width="1.5">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                <path d="M22 6l-10 7L2 6"></path>
-                            </svg>
+                            <svg width="50" height="50" viewBox="0 0 24 24" fill="#fbbf24" stroke="#d97706" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><path d="M22 6l-10 7L2 6"></path></svg>
                             <p class="text-[9px] uppercase tracking-widest text-yellow-400 mt-2 font-bold">¡Sorpresa!</p>
+                        </div>
+                        <div id="ipad-envelope" class="envelope-container hidden flex flex-col items-center" onclick="openModal('ipad')">
+                            <svg width="50" height="50" viewBox="0 0 24 24" fill="#ff69b4" stroke="#c71585" stroke-width="1.5"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><circle cx="12" cy="18" r="1"></circle></svg>
+                            <p class="text-[9px] uppercase tracking-widest text-pink-400 mt-2 font-bold">iPad</p>
                         </div>
                     </div>
                 </div>
@@ -235,7 +245,9 @@
     </div>
 
     <script>
-        const startDate = new Date(2024, 11, 15); // 15 dic 2024
+        const startDate = new Date(2024, 11, 15);
+        let pinkStep = 0; 
+        let triviaPassed = false;
 
         function updateTimer() {
             const now = new Date();
@@ -246,9 +258,7 @@
                 document.getElementById('minutes').innerText = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
                 document.getElementById('seconds').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
             }
-            let years = now.getFullYear() - startDate.getFullYear();
-            let months = now.getMonth() - startDate.getMonth();
-            let totalMonths = years * 12 + months;
+            let totalMonths = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
             if (now.getDate() < startDate.getDate()) totalMonths--;
             document.getElementById('months-count').innerText = totalMonths;
         }
@@ -256,7 +266,7 @@
         function updateNextAnniversary() {
             const now = new Date();
             let nextDate = new Date(now.getFullYear(), now.getMonth(), 15);
-            if (now > nextDate) nextDate = new Date(now.getFullYear(), now.getMonth() + 1, 15);
+            if (now >= nextDate) nextDate = new Date(now.getFullYear(), now.getMonth() + 1, 15);
             const diff = nextDate - now;
             document.getElementById('next-days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
             document.getElementById('next-hours').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
@@ -267,34 +277,71 @@
 
         function openModal(type) {
             const body = document.getElementById('modal-body');
+            const surpriseActive = !document.getElementById('surprise-envelope').classList.contains('hidden');
+
             if(type === 'normal') {
                 body.innerHTML = `
                     <p class="mb-4 font-bold text-lg text-rose-700 text-center">Para mi cachetona hermosa,</p>
-                    <p class="mb-2">Hola mi amor,</p>
-                    <p class="mb-2">Quería dejarte este pequeño detalle para recordarte lo especial que eres para mí. Cada segundo, cada día y cada mes que pasa a tu lado es el mejor regalo.</p>
-                    <p class="mb-2">Gracias por ser mi compañera, mi pedorra mía y mi felicidad entera. No importa cuánto tiempo pase, siempre serás mi persona favorita.</p>
-                    <p class="mt-6 text-right font-bold text-rose-800">Te amo infinitamente.<br>Siempre tuyo. ❤️</p>`;
+                    <p class="mb-2 text-xl font-['Dancing_Script']">Hola mi amor,</p>
+                    <p class="mb-2 text-xl font-['Dancing_Script']">Quería dejarte este pequeño detalle para recordarte lo especial que eres para mí. Cada segundo, cada día y cada mes que pasa a tu lado es el mejor regalo.</p>
+                    <p class="mb-2 text-xl font-['Dancing_Script']">Gracias por ser mi compañera, mi pedorra mía y mi felicidad entera. No importa cuánto tiempo pase, siempre serás mi persona favorita.</p>
+                    <p class="mt-6 text-right font-bold text-rose-800">Te amo infinitamente. ❤️</p>
+                    ${(surpriseActive && pinkStep === 0) ? '<div class="mt-4 flex justify-center"><div class="pink-trigger" onclick="nextPink(1)"><svg width="25" height="25" viewBox="0 0 24 24" fill="#ff69b4"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div></div>' : ''}
+                `;
             } else if(type === 'trivia') {
+                if(triviaPassed) { 
+                    showPrizeContent(); 
+                } else {
+                    body.innerHTML = `
+                        <div class="font-['Montserrat'] text-sm">
+                            <h2 class="text-xl font-bold text-rose-700 mb-4 text-center">Contesta amor ❤️</h2>
+                            <p class="font-bold mb-1 text-xs uppercase">1. Nombre completo de tu novio:</p>
+                            <input type="text" id="ans1" class="trivia-input">
+                            <p class="font-bold mb-1 text-xs uppercase">2. ¿Cuándo empezaron a hablar?</p>
+                            <input type="text" id="ans2" class="trivia-input" placeholder="Ej: 2 de septiembre del 2024">
+                            <p class="font-bold mb-1 text-xs uppercase">3. Mascota que extraña tu novio:</p>
+                            <input type="text" id="ans3" class="trivia-input">
+                            <button onclick="checkTrivia()" class="trivia-btn">Verificar</button>
+                            <p id="error-msg" class="text-red-500 text-xs mt-2 hidden text-center italic">¡Ups! Algo no coincide, amor.</p>
+                        </div>`;
+                }
+            } else if(type === 'ipad') {
                 body.innerHTML = `
-                    <div class="font-['Montserrat'] text-sm">
-                        <h2 class="text-xl font-bold text-rose-700 mb-4 text-center">contesta estas 3 preguntas para ganarte una sorpresa ❤️</h2>
-                        <p class="font-bold mb-1 text-xs uppercase">1. Nombre completo de tu novio:</p>
-                        <input type="text" id="ans1" class="trivia-input" placeholder="...">
-                        <p class="font-bold mb-1 text-xs uppercase">2. ¿Cuándo empezaron a hablar?</p>
-                        <input type="text" id="ans2" class="trivia-input" placeholder="Ej: 5 de enero del 2025">
-                        <p class="font-bold mb-1 text-xs uppercase">3. Mascota que extraña tu novio:</p>
-                        <input type="text" id="ans3" class="trivia-input" placeholder="...">
-                        <button onclick="checkTrivia()" class="trivia-btn">Verificar Respuestas</button>
-                        <p id="error-msg" class="text-red-500 text-xs mt-2 hidden text-center italic">¡Ups! Alguna respuesta no coincide, amor.</p>
+                    <div class="text-center">
+                        <h2 class="text-3xl font-bold text-pink-600 mb-4 font-['Great_Vibes']">🎁 ¡Lo lograste!</h2>
+                        <p class="text-xl">Te has ganado un:</p>
+                        <p class="text-4xl font-bold text-pink-500 my-4 uppercase tracking-tighter">iPad Rosa</p>
+                        <p class="text-sm text-gray-500 italic">(Llegará en 5 años más, ¡prometido! 🌸)</p>
+                        <p class="mt-4 text-rose-800 font-bold">Te amo infinitamente. ❤️</p>
                     </div>`;
             }
             document.getElementById('main-modal').style.display = 'flex';
             setTimeout(() => document.getElementById('main-modal').classList.add('active'), 10);
         }
 
-        function closeModal() {
-            document.getElementById('main-modal').classList.remove('active');
-            setTimeout(() => document.getElementById('main-modal').style.display = 'none', 500);
+        function showPrizeContent() {
+            const body = document.getElementById('modal-body');
+            body.innerHTML = `
+                <div class="text-center py-6">
+                    <h2 class="text-4xl font-bold text-yellow-600 mb-4 font-['Great_Vibes']">🎫 ¡Lo lograste!</h2>
+                    <p class="text-2xl font-['Dancing_Script'] text-rose-700">Te ganaste una cena sorpresa conmigo.</p>
+                    ${pinkStep === 1 ? '<div class="mt-6 flex justify-center"><div class="pink-trigger" onclick="nextPink(2)"><svg width="30" height="30" viewBox="0 0 24 24" fill="#ff69b4"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div></div>' : ''}
+                </div>`;
+        }
+
+        function closeModal() { document.getElementById('main-modal').classList.remove('active'); setTimeout(()=> {document.getElementById('main-modal').style.display = 'none';}, 500); }
+
+        function nextPink(step) {
+            if(step === 1) { pinkStep = 1; closeModal(); }
+            if(step === 2) { pinkStep = 2; document.getElementById('pink-heart-flower').style.display = 'block'; closeModal(); }
+        }
+
+        function stepThree() { 
+            // CONFETI INMEDIATO AL TOCAR CORAZÓN
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#ff69b4', '#ff1493', '#ffffff', '#ffd700'] });
+            document.getElementById('pink-heart-flower').remove(); 
+            const env = document.getElementById('ipad-envelope');
+            env.classList.remove('hidden'); env.classList.add('animate-pop-in');
         }
 
         function checkTrivia() {
@@ -302,24 +349,18 @@
             const a2 = document.getElementById('ans2').value.trim().toLowerCase();
             const a3 = document.getElementById('ans3').value.trim().toLowerCase();
             if(a1 === "oscar antonio romero robles" && (a2.includes("2 de septiembre") || a2.includes("2 de sept")) && a3 === "watis") {
-                document.getElementById('modal-body').innerHTML = `
-                    <div class="text-center py-6">
-                        <h2 class="text-4xl font-bold text-yellow-600 mb-4 font-['Great_Vibes']">🎫 ¡Lo lograste!</h2>
-                        <p class="text-2xl font-['Dancing_Script']">Te ganaste una cena sorpresa conmigo.</p>
-                        <p class="mt-8 text-rose-700 font-bold">Te amo muchísimo! ❤️</p>
-                    </div>`;
-            } else {
-                document.getElementById('error-msg').classList.remove('hidden');
-            }
+                triviaPassed = true;
+                showPrizeContent();
+            } else { document.getElementById('error-msg').classList.remove('hidden'); setTimeout(() => document.getElementById('error-msg').classList.add('hidden'), 3000); }
         }
 
-        const phrases = ["Te Amo Alondra", "Eres mi vida", "Siempre juntos", "Mi niña hermosa", "Gracias por existir", "Cada día más", "Tú y Yo", "Mi felicidad", "Mi chachetona hermosa", "Pedorra mia"];
+        // --- Corazones y Física ---
+        const phrasesArr = ["Te Amo Alondra", "Eres mi vida", "Siempre juntos", "Mi niña hermosa", "Gracias por existir", "Cada día más", "Tú y Yo", "Mi felicidad", "Mi chachetona hermosa", "Pedorra mia"];
         function createFloatingPhrase() {
             const p = document.createElement('div');
-            p.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+            p.innerText = phrasesArr[Math.floor(Math.random() * phrasesArr.length)];
             p.className = 'floating-phrase';
-            p.style.left = `${Math.random() * 80 + 10}%`;
-            p.style.top = `${Math.random() * 50 + 30}%`;
+            p.style.left = `${Math.random() * 80 + 10}%`; p.style.top = `${Math.random() * 50 + 30}%`;
             p.style.fontSize = `${Math.random() * 1.2 + 1.8}rem`;
             document.getElementById('phrases-container').appendChild(p);
             setTimeout(() => p.remove(), 9000);
@@ -330,18 +371,12 @@
         let hearts = [];
         let lastInputX = 0, lastInputY = 0, inputVx = 0, inputVy = 0, draggedHeart = null;
 
-        function getPointerPos(e) {
-            if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            return { x: e.clientX, y: e.clientY };
-        }
+        function getPointerPos(e) { if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY }; return { x: e.clientX, y: e.clientY }; }
 
         window.addEventListener('mousemove', (e) => {
-            const pos = getPointerPos(e);
-            inputVx = pos.x - lastInputX; inputVy = pos.y - lastInputY;
-            lastInputX = pos.x; lastInputY = pos.y;
+            const pos = getPointerPos(e); inputVx = pos.x - lastInputX; inputVy = pos.y - lastInputY; lastInputX = pos.x; lastInputY = pos.y;
             if (draggedHeart) { draggedHeart.x = pos.x - 15; draggedHeart.y = pos.y - 15; draggedHeart.vx = inputVx; draggedHeart.vy = inputVy; }
         });
-
         const release = () => { if (draggedHeart) { draggedHeart.vx *= 0.8; draggedHeart.vy *= 0.8; draggedHeart.isDragging = false; draggedHeart = null; } };
         window.addEventListener('mouseup', release); window.addEventListener('touchend', release);
 
@@ -354,20 +389,16 @@
                 this.element.innerHTML = `<svg width="35" height="35" viewBox="0 0 24 24" fill="${color}"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
                 this.x = Math.random() * window.innerWidth;
                 this.y = window.innerHeight + 50;
-                this.vx = (Math.random() - 0.5) * 2.5;
-                this.vy = -(Math.random() * 2 + 1.5);
+                this.vx = (Math.random() - 0.5) * 2.5; this.vy = -(Math.random() * 2 + 1.5);
                 this.isDragging = false; this.isDead = false;
                 heartsLayer.appendChild(this.element);
 
                 const startDrag = (e) => {
-                    const pos = getPointerPos(e);
-                    lastInputX = pos.x; lastInputY = pos.y;
-                    this.isDragging = true; draggedHeart = this;
-                    this.vx = 0; this.vy = 0;
+                    const pos = getPointerPos(e); lastInputX = pos.x; lastInputY = pos.y; this.isDragging = true; draggedHeart = this;
                     if(this.isSpecial) {
                         const env = document.getElementById('surprise-envelope');
-                        env.classList.remove('hidden'); env.classList.add('animate-pop-in');
-                        setTimeout(() => { this.isDead = true; }, 100);
+                        if (env.classList.contains('hidden')) { env.classList.remove('hidden'); env.classList.add('animate-pop-in'); }
+                        this.isDead = true;
                     }
                 };
                 this.element.addEventListener('mousedown', startDrag);
@@ -390,26 +421,9 @@
             requestAnimationFrame(loop);
         }
         loop();
-
-        // Generar corazones rojos normales
         setInterval(() => { if(hearts.length < 15) hearts.push(new Heart(false)); }, 700);
-        
-        // Bucle del corazón dorado: aparece cada 30 segundos si el sobre sorpresa aún no se ha desbloqueado
-        setInterval(() => {
-            const envelope = document.getElementById('surprise-envelope');
-            if (envelope.classList.contains('hidden')) {
-                hearts.push(new Heart(true));
-            }
-        }, 30000);
-        
-        // Primera aparición a los 10 segundos
-        setTimeout(() => {
-            const envelope = document.getElementById('surprise-envelope');
-            if (envelope.classList.contains('hidden')) {
-                hearts.push(new Heart(true));
-            }
-        }, 10000);
-
+        setInterval(() => { if(document.getElementById('surprise-envelope').classList.contains('hidden')) hearts.push(new Heart(true)); }, 30000);
+        setTimeout(() => { if(document.getElementById('surprise-envelope').classList.contains('hidden')) hearts.push(new Heart(true)); }, 10000);
     </script>
 </body>
 </html>
